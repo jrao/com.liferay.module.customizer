@@ -1,0 +1,101 @@
+buildscript {
+	dependencies {
+		classpath group: "com.liferay", name: "com.liferay.gradle.plugins", version: "3.5.23"
+	}
+
+	repositories {
+		maven {
+			url "https://cdn.lfrs.sl/repository.liferay.com/nexus/content/groups/public"
+		}
+	}
+}
+
+apply plugin: "com.liferay.plugin"
+apply plugin: "java"
+
+def groupId = "com.liferay"
+def artifactId = "com.liferay.hello.soy.web"
+def version = "1.0.14"
+def jarName = artifactId + "-" + version + ".jar"
+def targetDependencyDir = buildDir.toString() + '/targetDependency'
+def unzippedDir = targetDependencyDir + '/unzipped'
+
+dependencies {
+	compile group: groupId, name: artifactId, version: version
+}
+
+repositories {
+	mavenLocal()
+
+	mavenCentral()
+
+	maven {
+		url "https://cdn.lfrs.sl/repository.liferay.com/nexus/content/groups/public"
+	}
+}
+
+task copyTargetDependency(type: Copy, dependsOn: build) {
+	group 'Liferay Module Customizer'
+	description 'Downloads the target module (i.e., the module to be customized)'
+
+	from configurations.compile {
+		include jarName
+	}
+	into targetDependencyDir
+}
+
+task unzipTargetDependency(type: Copy, dependsOn: copyTargetDependency) {
+	group 'Liferay Module Customizer'
+	description 'Unzips the target module (i.e., the module to be customized)'
+
+	def zipFile = file(targetDependencyDir + '/' + jarName)
+	def toDir = file(unzippedDir)
+
+	from zipTree(zipFile)
+	into toDir
+}
+
+task copyBnd(type: Copy, dependsOn: unzipTargetDependency) {
+	group 'Liferay Module Customizer'
+	description 'Copies the bnd.bnd file from the target module to the customizer module'
+
+	from unzippedDir + '/bnd.bnd'
+	into 'bnd.bnd'
+}
+
+task overlayJava(type: Copy, dependsOn: copyBnd) {
+	group 'Liferay Module Customizer'
+	description 'Copies the .class files of the customized Java source files to the unzipped target module'
+
+	def fromDir = file(buildDir.toString() + '/classes/main')
+	def toDir = file(unzippedDir)
+
+	from fromDir
+	into toDir
+}
+
+task overlayResources(type: Copy, dependsOn: overlayJava) {
+	group 'Liferay Module Customizer'
+	description 'Copies the customized resource files to the unzipped target module'
+
+	def fromDir = file(buildDir.toString() + '/resources/main')
+	def toDir = file(unzippedDir)
+
+	from fromDir
+	into toDir
+}
+
+task buildJar(type: Zip, dependsOn: overlayResources) {
+	group 'Liferay Module Customizer'
+	description 'Creates the customized .jar file'
+
+	from(unzippedDir) {
+		include '**/MANIFEST.MF'
+	}
+	from(unzippedDir) {
+		exclude '**/MANIFEST.MF'
+	}
+
+	archiveName artifactId + '-' + version + '-customized.jar'
+	destinationDir(buildDir)
+}
