@@ -1,0 +1,22 @@
+buildscript {
+	dependencies {
+		classpath group: "com.liferay", name: "com.liferay.gradle.plugins", version: "3.5.23"
+	}
+
+	repositories {
+		maven {
+			url "https://cdn.lfrs.sl/repository.liferay.com/nexus/content/groups/public"
+		}
+	}
+}
+
+// example: def customizerModuleName = "com.liferay.login.web.customizer"
+def customizerModuleName = "?"
+
+task copyTemplate(type: Copy) {
+	group 'Liferay Module Customizer Template'
+	description 'Copies the Liferay module customizer template so it can serve as a new project'
+
+	from 'template'
+	into customizerModuleName
+}
