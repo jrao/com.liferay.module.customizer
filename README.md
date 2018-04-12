@@ -56,4 +56,8 @@ Goal: This repository contains a template for creating projects that customize L
    
    This command initiates a sequence of tasks which downloads the target jar, unzips it, overlays it with your custom resources, and zips it back up. Inspect your customizer module's `build.gradle` file for details.
 
-	In your module's `build` directory, look for a resource with the same name as your target module except with a suffix of `-customized.jar` instead of just `.jar`. This artifact is ready for deployment and testing. Some customizations (such as those involving Soy templates) require a Liferay restart in order to take effect.
+	In your module's `build` directory, look for a resource with the same name as your target module except with a suffix of `customized.jar` instead of just `.jar`. This artifact is ready for deployment and testing. Some customizations (such as those involving Soy templates) require a Liferay restart in order to take effect.
+
+## Notes
+
+The technique described here to produce a custom module uses a strategy of overlaying custom resources on top of the target module's resources. This technique is most useful for relatively simple customizations that you may need to make to Liferay modules. If you have a complex use case (such as needing to write code which necessitates having to alter the target module's `bnd.bnd` file and thus also the target module's `MANIFEST.MF` file), it's probably simpler for you to copy the target module's source code into a new project and make your customizations there.
