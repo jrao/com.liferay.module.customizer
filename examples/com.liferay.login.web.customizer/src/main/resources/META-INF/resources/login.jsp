@@ -57,8 +57,11 @@
 		%>
 
 		<div class="login-container">
+			<%
+			int x = 2 + 2;
+			%>
 			<p>
-			Hello from com.liferay.login.web.customizer module!
+			Hello from com.liferay.login.web.customizer module! 2 + 2 = <%= x %>
 			</p>
 
 			<portlet:actionURL name="/login/login" secure="<%= PropsValues.COMPANY_SECURITY_AUTH_REQUIRES_HTTPS || request.isSecure() %>" var="loginURL">
