@@ -75,15 +75,7 @@ task unzipTargetDependency(type: Copy, dependsOn: copyTargetDependency) {
 	into toDir
 }
 
-task copyBnd(type: Copy, dependsOn: unzipTargetDependency) {
-	group 'Liferay Module Customizer'
-	description 'Copies the bnd.bnd file from the target module to the customizer module'
-
-	from unzippedDir + '/bnd.bnd'
-	into 'bnd.bnd'
-}
-
-task overlayJava(type: Copy, dependsOn: copyBnd) {
+task overlayJava(type: Copy, dependsOn: unzipTargetDependency) {
 	group 'Liferay Module Customizer'
 	description 'Copies the .class files of the customized Java source files to the unzipped target module'
 
@@ -105,8 +97,6 @@ task overlayResources(type: Copy, dependsOn: overlayJava) {
 	into toDir
 	
 	ext.updateBundleVersion = { File manifestFile ->
-		println 'manifest exists: ' + manifestFile.exists()
-
 		final String BUNDLE_VERSION = "Bundle-Version:"
 		def manifestLines = manifestFile.readLines()
 		def sb = new StringBuilder()
@@ -132,28 +122,16 @@ task overlayResources(type: Copy, dependsOn: overlayJava) {
 		}
 	
 		def newManifestStr = sb.toString()
-		def newManifestFile = new File(unzippedDir + '/META-INF/MANIFEST.MF.new')
-		newManifestFile.write(newManifestStr)
+		manifestFile.setText(newManifestStr, 'UTF-8')
 	}
 	
 	doLast {
 		def manifestFile = new File(unzippedDir + '/META-INF/MANIFEST.MF')
 		updateBundleVersion(manifestFile)
-
-		manifestFile.delete()
-		
-		def newManifestFile = new File(unzippedDir + '/META-INF/MANIFEST.MF.new')
-		newManifestFile.renameTo(unzippedDir + '/META-INF/MANIFEST.MF')
 	}
 }
 
-task updateManifest(dependsOn: overlayResources) {
-	println 'In updateManifest'
-	def manifestFileStr = unzippedDir + '/META-INF/MANIFEST.MF'
-	def newManifestFile = unzippedDir + '/META-INF/MANIFEST.MF.new'
-}
-
-task buildJar(type: Zip, dependsOn: updateManifest) {
+task buildJar(type: Zip, dependsOn: overlayResources) {
 	group 'Liferay Module Customizer'
 	description 'Creates the customized .jar file'
 

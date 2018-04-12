@@ -1,6 +1,7 @@
 buildscript {
 	dependencies {
 		classpath group: "com.liferay", name: "com.liferay.gradle.plugins", version: "3.5.23"
+		classpath group: "org.osgi", name: "org.osgi.core", version: "6.0.0"
 	}
 
 	repositories {
@@ -13,12 +14,14 @@ buildscript {
 apply plugin: "com.liferay.plugin"
 apply plugin: "java"
 
+import org.osgi.framework.Version
+
 def groupId = "?"
 def artifactId = "?"
 def version = "?"
 def jarName = artifactId + "-" + version + ".jar"
 def targetDependencyDir = buildDir.toString() + '/targetDependency'
-def unzippedDir = targetDependency + '/unzipped'
+def unzippedDir = targetDependencyDir + '/unzipped'
 
 dependencies {
 	compile group: groupId, name: artifactId, version: version
@@ -41,7 +44,7 @@ task copyTargetDependency(type: Copy, dependsOn: build) {
 	from configurations.compile {
 		include jarName
 	}
-	into 'targetDependency'
+	into targetDependencyDir
 }
 
 task unzipTargetDependency(type: Copy, dependsOn: copyTargetDependency) {
@@ -55,15 +58,7 @@ task unzipTargetDependency(type: Copy, dependsOn: copyTargetDependency) {
 	into toDir
 }
 
-task copyBnd(type: Copy, dependsOn: unzipTargetDependency) {
-	group 'Liferay Module Customizer'
-	description 'Copies the bnd.bnd file from the target module to the customizer module'
-
-	from unzippedDir + '/bnd.bnd'
-	into 'bnd.bnd'
-}
-
-task overlayJava(type: Copy, dependsOn: copyBnd) {
+task overlayJava(type: Copy, dependsOn: unzipTargetDependency) {
 	group 'Liferay Module Customizer'
 	description 'Copies the .class files of the customized Java source files to the unzipped target module'
 
@@ -83,6 +78,40 @@ task overlayResources(type: Copy, dependsOn: overlayJava) {
 
 	from fromDir
 	into toDir
+	
+	ext.updateBundleVersion = { File manifestFile ->
+		final String BUNDLE_VERSION = "Bundle-Version:"
+		def manifestLines = manifestFile.readLines()
+		def sb = new StringBuilder()
+
+		for (String line : manifestLines) {
+			if (line.startsWith(BUNDLE_VERSION)) {
+				def versionLine = new String(line)
+				versionLine = versionLine.replaceFirst(BUNDLE_VERSION, "").trim()
+				Version osgiVersion = Version.parseVersion(versionLine)
+				def qualifier = osgiVersion.getQualifier()
+				def suffix = 'customized'
+
+				if (qualifier.isEmpty()) {
+					line = line + '.' + suffix
+				}
+				else {
+					line = line + '-' + suffix
+				}
+			}
+			
+			sb.append(line)
+			sb.append('\n')
+		}
+	
+		def newManifestStr = sb.toString()
+		manifestFile.setText(newManifestStr, 'UTF-8')
+	}
+	
+	doLast {
+		def manifestFile = new File(unzippedDir + '/META-INF/MANIFEST.MF')
+		updateBundleVersion(manifestFile)
+	}
 }
 
 task buildJar(type: Zip, dependsOn: overlayResources) {
