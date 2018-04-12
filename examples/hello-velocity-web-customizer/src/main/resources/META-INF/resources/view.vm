@@ -1,0 +1,7 @@
+#set ($foo = "Velocity")
+
+#set ($x = 2 + 2)
+
+Hello $foo
+
+<p>2 + 2 = $x</p>
