@@ -11,8 +11,7 @@ buildscript {
 	}
 }
 
-apply plugin: "com.liferay.plugin"
-apply plugin: "java"
+apply plugin: "com.liferay.osgi.plugin"
 
 import org.osgi.framework.Version
 
@@ -54,7 +53,7 @@ repositories {
 	}
 }
 
-task copyTargetDependency(type: Copy, dependsOn: build) {
+task copyTargetDependency(type: Copy, dependsOn: jar) {
 	group 'Liferay Module Customizer'
 	description 'Downloads the target module (i.e., the module to be customized)'
 

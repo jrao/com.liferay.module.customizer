@@ -60,7 +60,7 @@
 			<%
 			int x = 2 + 2;
 			%>
-			<p>
+			<p class="red-background">
 			Hello from com.liferay.login.web.customizer module! 2 + 2 = <%= x %>
 			</p>
 
