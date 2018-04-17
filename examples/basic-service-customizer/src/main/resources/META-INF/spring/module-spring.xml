@@ -12,6 +12,6 @@
 	<bean class="com.liferay.blade.samples.servicebuilder.service.persistence.impl.FooPersistenceImpl" id="com.liferay.blade.samples.servicebuilder.service.persistence.FooPersistence" parent="basePersistence" />
 
 	<bean class="com.liferay.blade.samples.servicebuilder.service.impl.MySpringBean" id="com.liferay.blade.samples.servicebuilder.service.impl.MySpringBean">
-		<constructor-arg ref="My Spring Bean text" />
+		<constructor-arg index="0" value="My Spring Bean text" />
 	</bean>
 </beans>
