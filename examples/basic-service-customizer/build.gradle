@@ -41,7 +41,7 @@ repositories {
 	}
 }
 
-task copyTargetDependency(type: Copy, dependsOn: build) {
+task copyTargetDependency(type: Copy, dependsOn: jar) {
 	group 'Liferay Module Customizer'
 	description 'Downloads the target module (i.e., the module to be customized)'
 
