@@ -130,7 +130,22 @@ task overlayResources(type: Copy, dependsOn: overlayJava) {
 	}
 }
 
-task buildJar(type: Zip, dependsOn: overlayResources) {
+task moveSassCache(type: Copy, dependsOn: overlayResources) {
+	group 'Liferay Module Customizer'
+	description 'Moves the SASS cache into correct position'
+
+	def fromDir = file(unzippedDir + '/META-INF/resources/css/.sass-cache')
+	def toDir = file(unzippedDir + '/META-INF/resources/css')
+
+	from fromDir
+	into toDir
+
+	doLast {
+		fromDir.deleteDir()
+	}
+}
+
+task buildJar(type: Zip, dependsOn: moveSassCache) {
 	group 'Liferay Module Customizer'
 	description 'Creates the customized .jar file'
 
