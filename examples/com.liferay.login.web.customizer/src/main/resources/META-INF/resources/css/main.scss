@@ -1,17 +1,15 @@
 @import "bourbon";
 
 .portlet-login {
+	.hello {
+		background-color: red;
+	}
+
 	.form {
 		fieldset {
 			border-width: 0;
 			margin-bottom: 0;
 			padding: 0;
-		}
-
-		.red-background {
-			background-color: red;
-			width: 50px;
-			font-size: 60px;
 		}
 
 		.button-holder, .form-column {
@@ -31,18 +29,6 @@
 		@include hyphens;
 	}
 
-	.red-background {
-		background-color: red;
-		width: 50px;
-		font-size: 60px;
-	}
-
-}
-
-.red-background {
-	background-color: red;
-	width: 50px;
-	font-size: 60px;
 }
 
 .login-container {
