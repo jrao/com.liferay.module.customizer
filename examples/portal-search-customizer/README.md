@@ -1,0 +1,1 @@
+portal-search-customizer demonstrates overriding Freemarker templates
